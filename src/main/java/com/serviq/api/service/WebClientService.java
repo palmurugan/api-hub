@@ -4,6 +4,7 @@ import com.serviq.api.config.properties.MicroserviceProperties;
 import com.serviq.api.util.WebClientErrorHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,27 @@ public class WebClientService {
 
             return request
                     .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(responseType);
+        });
+    }
+
+    public <R> Mono<R> get(String serviceName, String uri, ParameterizedTypeReference<R> responseType) {
+        return get(serviceName, uri, responseType, null);
+    }
+
+    public <R> Mono<R> get(String serviceName, String uri, ParameterizedTypeReference<R> responseType,
+                           Consumer<HttpHeaders> headersConsumer) {
+        return executeRequest(serviceName, () -> {
+            WebClient.RequestHeadersSpec<?> request = getWebClient(serviceName)
+                    .get()
+                    .uri(uri);
+
+            if (headersConsumer != null) {
+                request.headers(headersConsumer);
+            }
+
+            return request
                     .retrieve()
                     .bodyToMono(responseType);
         });

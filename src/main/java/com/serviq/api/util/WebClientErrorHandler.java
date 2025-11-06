@@ -6,6 +6,7 @@ import com.serviq.api.exception.ServiceUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
@@ -16,24 +17,24 @@ public class WebClientErrorHandler {
     public <T> Mono<T> handleError(Throwable error, String serviceName) {
         log.error("Error occurred while calling {} service: {}", serviceName, error.getMessage());
 
-        if (error instanceof WebClientResponseException) {
-            return handleWebClientResponseException((WebClientResponseException) error, serviceName);
+        switch (error) {
+            case WebClientResponseException webClientResponseException -> {
+                return handleWebClientResponseException(webClientResponseException, serviceName);
+            }
+            case WebClientRequestException webClientRequestException -> {
+                return Mono.error(new ServiceUnavailableException(
+                        String.format("Unable to connect to %s service", serviceName)));
+            }
+            case java.net.ConnectException connectException -> {
+                return Mono.error(new ServiceUnavailableException(
+                        String.format("Unable to connect to %s service", serviceName)));
+            }
+            default -> {
+                return Mono.error(new ServiceException(
+                        String.format("Unexpected error from %s service: %s", serviceName, error.getMessage()),
+                        500));
+            }
         }
-
-        if (error instanceof java.net.ConnectException) {
-            return Mono.error(new ServiceUnavailableException(
-                    String.format("Unable to connect to %s service", serviceName)));
-        }
-
-        if (error instanceof java.util.concurrent.TimeoutException ||
-                error instanceof io.netty.handler.timeout.TimeoutException) {
-            return Mono.error(new ServiceUnavailableException(
-                    String.format("%s service request timeout", serviceName)));
-        }
-
-        return Mono.error(new ServiceException(
-                String.format("Unexpected error from %s service: %s", serviceName, error.getMessage()),
-                500));
     }
 
     private <T> Mono<T> handleWebClientResponseException(
