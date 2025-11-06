@@ -1,0 +1,22 @@
+server:
+  port: 7070
+
+spring:
+  application:
+    name: provider-bff
+
+microservices:
+  services:
+    provider-service:
+      base-url: http://localhost:7073
+      connection-timeout: 5000
+      response-timeout: 5000
+      read-timeout: 5000
+      write-timeout: 5000
+      max-retries: 3
+      retry-backoff-millis: 500
+
+logging:
+  level:
+    com.serviq.api: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG
