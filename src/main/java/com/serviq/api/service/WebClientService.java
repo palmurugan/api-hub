@@ -50,6 +50,30 @@ public class WebClientService {
         });
     }
 
+    public <T, R> Mono<R> post(String serviceName, String uri, T requestBody,
+                               ParameterizedTypeReference<R> responseType) {
+        return post(serviceName, uri, requestBody, responseType, null);
+    }
+
+    public <T, R> Mono<R> post(String serviceName, String uri, T requestBody,
+                               ParameterizedTypeReference<R> responseType, Consumer<HttpHeaders> headersConsumer) {
+        return executeRequest(serviceName, () -> {
+            WebClient.RequestBodySpec request = getWebClient(serviceName)
+                    .post()
+                    .uri(uri)
+                    .contentType(MediaType.APPLICATION_JSON);
+
+            if (headersConsumer != null) {
+                request.headers(headersConsumer);
+            }
+
+            return request
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(responseType);
+        });
+    }
+
     public <R> Mono<R> get(String serviceName, String uri, ParameterizedTypeReference<R> responseType) {
         return get(serviceName, uri, responseType, null);
     }
