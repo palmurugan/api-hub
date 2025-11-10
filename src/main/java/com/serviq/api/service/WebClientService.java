@@ -75,6 +75,7 @@ public class WebClientService {
     }
 
     public <R> Mono<R> get(String serviceName, String uri, ParameterizedTypeReference<R> responseType) {
+        log.info("Executing GET request to {} service & URI {}", serviceName, uri);
         return get(serviceName, uri, responseType, null);
     }
 
