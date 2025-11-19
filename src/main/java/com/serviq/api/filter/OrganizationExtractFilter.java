@@ -8,11 +8,14 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Component
 @Order(-1)
 public class OrganizationExtractFilter implements WebFilter {
 
-    private static final String ORG_ID = "d9100327-5ae3-41be-922d-64e1c890ac86";
+    private static final UUID ORG_ID = UUID.fromString("d9100327-5ae3-41be-922d-64e1c890ac86");
+    private static final UUID USER_ID = UUID.fromString("b2c3d4e5-f678-9012-3456-7890abcdef12");
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -30,7 +33,9 @@ public class OrganizationExtractFilter implements WebFilter {
         }
 
         // Continue filter chain
-        return chain.filter(exchange).contextWrite(ctx -> ctx.put("orgId", ORG_ID));
+        return chain.filter(exchange).contextWrite(ctx ->
+                ctx.put("orgId", ORG_ID)
+                        .put("userId", USER_ID));
     }
 
     private String extractUserIdFromToken(String token) {
