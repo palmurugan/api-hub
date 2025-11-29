@@ -4,37 +4,27 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 @Data
 public class SearchServiceResponse {
 
-    private String id;
-
-    private String orgId;
-
-    private String serviceId;
-
-    private String title;
-
-    private String categoryId;
-
-    private String category;
-
-    private String providerId;
-
+    private UUID id;
+    private UUID orgId;
+    private UUID providerId;
+    private UUID categoryId;
     private String providerName;
-
-    private String primaryLocation;
-
-    private List<String> locations;
-
+    private String title;
+    private String description;
     private Integer duration;
-
     private String unit;
-
     private BigDecimal price;
-
     private String currency;
-
+    private Integer maxCapacity;
     private Boolean isActive;
+    private Map<String, Object> metadata;
+    private String primaryLocation;
+    private Set<LocationResponse> locations;
 }
